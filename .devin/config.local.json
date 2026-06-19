@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "allow": ["Exec(ls)", "Exec(Get-ChildItem)", "Exec(git)", "Exec(find)", "Exec(Format-Table)"]
+  }
+}
