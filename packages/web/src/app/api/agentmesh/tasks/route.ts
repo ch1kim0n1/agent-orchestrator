@@ -63,6 +63,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { title, description, role, priority, projectId, branch, issueId } = body;
+
+    if (!title || typeof title !== "string" || title.trim() === "") {
+      return NextResponse.json({ error: "title is required" }, { status: 400 });
+    }
+
     const { config, coordinationService } = await getServices();
     const resolvedProjectId = projectId || "default";
     const defaultBranch = config.projects[resolvedProjectId]?.defaultBranch || "main";
