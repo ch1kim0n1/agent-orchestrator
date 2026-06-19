@@ -247,7 +247,7 @@ export default function TaskBoard() {
                               e.stopPropagation();
                               startTask(task.id);
                             }}
-                            className="w-full text-xs rounded bg-[var(--color-accent)] text-[var(--color-text-inverse)] py-1 hover:bg-[var(--color-accent-hover)]"
+                            className="w-full text-xs rounded bg-[var(--color-accent)] text-[var(--color-text-inverse)] py-3.5 hover:bg-[var(--color-accent-hover)]"
                           >
                             Start
                           </button>

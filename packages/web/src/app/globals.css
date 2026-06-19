@@ -1158,6 +1158,8 @@ html.light .xterm .xterm-viewport:hover::-webkit-scrollbar-thumb:active {
 .dashboard-app-sidebar-toggle {
   width: 28px;
   height: 28px;
+  min-width: 44px;
+  min-height: 44px;
   border: none;
   border-radius: 5px;
   background: transparent;
