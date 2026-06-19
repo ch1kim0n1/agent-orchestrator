@@ -5212,8 +5212,9 @@ body:not(.is-resizing-x) .sidebar-wrapper {
   outline: none;
 }
 
-.project-sidebar__sess-rename-input:focus {
+.project-sidebar__sess-rename-input:focus-visible {
   border-color: var(--color-accent-amber);
+  box-shadow: 0 0 0 2px var(--color-accent-amber-dim);
 }
 
 /* Sidebar settings popover */
