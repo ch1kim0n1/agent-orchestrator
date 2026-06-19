@@ -199,7 +199,7 @@
 
   --t1: #f4f5f7; /* text: primary */
   --t2: #9ba1aa; /* text: secondary */
-  --t3: #646a73; /* text: tertiary */
+  --t3: #787e89; /* text: tertiary — lightened from #646a73 to pass WCAG AA 4.5:1 on --bg and --card */
   --t4: #444951; /* text: faint */
 
   --line: rgba(255, 255, 255, 0.06);
@@ -728,7 +728,7 @@ html.light .xterm .xterm-viewport:hover::-webkit-scrollbar-thumb:active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 44px;
   border-radius: 999px;
   font-family: inherit;
   font-size: 12px;
@@ -1192,8 +1192,8 @@ html.light .xterm .xterm-viewport:hover::-webkit-scrollbar-thumb:active {
   height: 7px;
   border-radius: 999px;
   flex-shrink: 0;
-  background: #22c55e;
-  box-shadow: 0 0 6px rgba(34, 197, 94, 0.55);
+  background: var(--color-status-ready);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--color-status-ready) 55%, transparent);
 }
 
 .dashboard-app-header__sep {
@@ -3816,7 +3816,9 @@ body:not(.is-resizing-x) .sidebar-wrapper {
   color: var(--color-text-primary);
   resize: none;
   outline: none;
-  transition: border-color 120ms ease-out;
+  transition:
+    border-color 120ms ease-out,
+    box-shadow 120ms ease-out;
 }
 
 .card__reply::placeholder {
@@ -3824,8 +3826,9 @@ body:not(.is-resizing-x) .sidebar-wrapper {
   font-size: 10.5px;
 }
 
-.card__reply:focus {
-  border-color: var(--color-border-strong);
+.card__reply:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-subtle);
 }
 
 @media (min-width: 768px) {
