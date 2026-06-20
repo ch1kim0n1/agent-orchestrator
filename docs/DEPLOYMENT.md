@@ -98,7 +98,7 @@ ao.example.com {
 ao update
 ```
 
-This pauses the running instance, upgrades the npm package, and restarts automatically.
+This pauses the running instance, upgrades the package, and restarts automatically. On Windows the pause is what releases the file locks so the global package directory can be rewritten; if the install fails the previous installation is restarted. See the [`ao update`](CLI.md#ao-update) section in the CLI reference for the full flow, Windows specifics/failure modes, a manual fallback, and a verification checklist.
 
 ## Health check
 

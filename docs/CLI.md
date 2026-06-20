@@ -70,7 +70,77 @@ and add `ao` to the `plugins=(...)` list in `~/.zshrc`.
 
 `ao doctor` checks PATH and launcher resolution, required binaries, configured plugin resolution, terminal-runtime health (tmux on Unix; PowerShell / `runtime-process` on Windows), GitHub CLI health, config support directories, stale AO temp files, and core build/runtime sanity. Runs and is supported on macOS, Linux, and Windows.
 
-`ao update` fast-forwards the local install on `main`, reinstalls dependencies, clean-rebuilds core packages, refreshes the launcher, and runs smoke tests. Works on macOS, Linux, and Windows (Windows uses the bundled `ao-update.ps1` script automatically). Use `ao update --skip-smoke` to stop after rebuild, or `ao update --smoke-only` to rerun just the smoke checks.
+### `ao update`
+
+`ao update` detects how the running `ao` binary was installed and upgrades it accordingly. It works on macOS, Linux, and Windows.
+
+**Install methods and what each does:**
+
+- **Git / source checkout** — fast-forwards the local install on `main`, reinstalls dependencies, clean-rebuilds core packages, refreshes the launcher, and runs smoke tests. Windows uses the bundled `ao-update.ps1` script automatically. Use `ao update --skip-smoke` to stop after rebuild, or `ao update --smoke-only` to rerun just the smoke checks. (These two flags only apply to git installs; on package-manager installs they are rejected with an error.)
+- **npm / pnpm / bun global** — checks the registry, then runs the matching package-manager command (`npm install -g @aoagents/ao@latest`, `pnpm add -g @aoagents/ao@latest`, or `bun add -g @aoagents/ao@latest`).
+- **Homebrew** — does not auto-install (it would clobber brew's symlinks); prints `brew upgrade ao` for you to run.
+- **Unknown** — prints the npm command as a best-effort suggestion. You can override detection in `~/.agent-orchestrator/config.yaml` with `installMethod: pnpm-global` (or `bun-global`, `npm-global`, `homebrew`, `git`).
+
+`ao update --check` prints version/channel info as JSON without upgrading.
+
+**Lifecycle around the install (package-manager installs).** When AO is running — or there are active sessions (`working`, `idle`, `needs_input`, `stuck`) — `ao update`:
+
+1. Snapshots which projects/sessions are live (from `running.json`, falling back to the global config), so they can be restored afterward.
+2. Pauses AO with `ao stop --yes` and re-checks that it is fully stopped. If AO still appears active after the stop, the update aborts before installing and tells you to run `ao stop` and retry.
+3. Runs the package-manager install command.
+4. Verifies the result with `ao --version`, comparing it to the expected latest version.
+5. Restarts AO with `ao start <project> --restore` (or `--no-restore` if you passed `ao update --no-restore`).
+
+**If the install or verification fails:** AO reports that it was **not** updated (you are still on the previous version), prints classified remediation (permission, network, registry, lockfile, pnpm virtual store, etc.) plus the package-manager output, and — if it had paused a running AO — **restarts the previous installation** so you are not left with AO stopped.
+
+#### Windows specifics
+
+- **File locks / "release the locks first."** A running AO daemon (the dashboard, lifecycle worker, and any pty-host processes) can hold open handles to the installed files. On Windows an open handle prevents the package manager from overwriting those files, so the install would fail with a sharing-violation/`EPERM`-style error. This is exactly why `ao update` stops AO *before* installing (step 2 above): the stop releases the file locks so the global package directory can be rewritten cleanly.
+- **pty-hosts are swept on stop.** On Windows, runtime sessions run as ConPTY pty-host processes rather than tmux windows. `ao stop` reaps orphaned pty-hosts (`sweepWindowsPtyHosts()` / the registry-backed cleanup), so the pause performed by `ao update` also clears any lingering pty-host handles that could otherwise keep files locked.
+- **Global install permissions / `EPERM`.** Global package installs write to the npm/pnpm/bun global prefix. If that location is not writable by your user, the install fails with `EPERM` / "access denied". `ao update` classifies this and tells you to fix your global prefix permissions or retry from a shell that can write there. If your global prefix lives under `Program Files` (or another protected path), re-run from an **elevated** (Run as administrator) PowerShell. The cleaner fix is to point the global prefix at a user-writable directory (e.g. `npm config set prefix %USERPROFILE%\.npm-global`) so elevation is never required.
+- **Shim resolution.** npm/pnpm/bun install as `*.cmd` shims on Windows; `ao update` spawns the install through a shell so `PATHEXT` is consulted and the shim resolves. You do not need to do anything for this — it is handled automatically.
+
+#### Windows manual fallback
+
+If `ao update` itself cannot complete (for example, it cannot spawn the package manager, or you want to run the steps by hand), reproduce the same flow manually in PowerShell:
+
+```powershell
+ao stop --yes                          # release file locks; sweep pty-hosts
+npm install -g @aoagents/ao@latest     # if EPERM, re-run from an elevated shell
+ao start --restore                     # restart AO and restore stopped sessions
+```
+
+Use `pnpm add -g @aoagents/ao@latest` or `bun add -g @aoagents/ao@latest` instead of the npm line if that is your global package manager.
+
+#### Verification checklist (Windows)
+
+Run these to confirm the update flow worked end to end. Expected results are listed alongside each command.
+
+```powershell
+# 1. Record the version you are on before updating.
+ao --version
+#    → prints the current version, e.g. 0.9.1
+
+# 2. (Optional) Confirm an update is available without installing.
+ao update --check
+#    → prints JSON with currentVersion / latestVersion / channel
+
+# 3. Run the update. With AO running, watch for the pause/restart lines.
+ao update
+#    → "… will be paused and restored after the update." (if sessions were active)
+#    → "Restarting AO: ao start … --restore"
+#    → "Update complete: <old> → <new>. AO restarted."
+
+# 4. Confirm the binary now reports the new version.
+ao --version
+#    → prints the NEW version (different from step 1)
+
+# 5. Confirm AO came back up and your sessions were restored.
+ao status
+#    → dashboard/orchestrator running; previously active sessions listed again
+```
+
+If step 3 reports "AO was not updated", `ao --version` in step 4 should still equal step 1, and step 5 should show AO restarted on the *previous* version — that is the documented failure behavior (the previous install is restarted, nothing is left half-upgraded).
 
 ## Multi-Project Rollout
 
