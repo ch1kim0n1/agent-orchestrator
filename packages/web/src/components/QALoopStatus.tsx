@@ -7,8 +7,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import type { ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 /**
  * State icons are monochrome inline SVG (lucide-derived paths) that inherit the
