@@ -15,6 +15,7 @@
 import {
   isTerminalSession,
   loadConfig,
+  logFatal,
   markDaemonShutdownHandlerInstalled,
   recordActivityEvent,
   sweepDaemonChildren,
@@ -57,18 +58,31 @@ export function installShutdownHandlers(ctx: ShutdownContext): void {
   handlersInstalled = true;
   markDaemonShutdownHandlerInstalled();
 
-  const shutdown = (signal: NodeJS.Signals): void => {
+  // A shutdown is triggered either by a POSIX signal or by a fatal crash
+  // (uncaughtException / unhandledRejection). Both run the identical
+  // graceful-shutdown body below; only the exit code and the trigger label
+  // recorded in observability differ.
+  type ShutdownCause =
+    | { type: "signal"; signal: NodeJS.Signals }
+    | { type: "crash"; signal: NodeJS.Signals };
+
+  const shutdown = (cause: ShutdownCause): void => {
     if (shuttingDown) return;
     shuttingDown = true;
 
-    const exitCode = signal === "SIGINT" ? 130 : 0;
+    const signal = cause.signal;
+    const exitCode =
+      cause.type === "crash" ? 1 : cause.signal === "SIGINT" ? 130 : 0;
 
     recordActivityEvent({
       projectId: ctx.projectId,
       source: "cli",
-      kind: "cli.shutdown_signal",
-      level: "info",
-      summary: `received ${signal}, beginning graceful shutdown`,
+      kind: cause.type === "crash" ? "cli.shutdown_crash" : "cli.shutdown_signal",
+      level: cause.type === "crash" ? "error" : "info",
+      summary:
+        cause.type === "crash"
+          ? `fatal ${signal}, beginning graceful shutdown`
+          : `received ${signal}, beginning graceful shutdown`,
       data: { signal, exitCode },
     });
 
@@ -191,9 +205,34 @@ export function installShutdownHandlers(ctx: ShutdownContext): void {
   };
 
   process.once("SIGINT", (sig) => {
-    shutdown(sig);
+    shutdown({ type: "signal", signal: sig });
   });
   process.once("SIGTERM", (sig) => {
-    shutdown(sig);
+    shutdown({ type: "signal", signal: sig });
+  });
+
+  // Crash safety: turn otherwise-fatal, unhandled errors into the same
+  // graceful shutdown (last-stop write + cleanup + unregister) instead of an
+  // abrupt process death that strands sessions and skips restore state.
+  //
+  // Re-entrancy: persist the fatal record FIRST (durable trail even if the
+  // shutdown body itself throws), then delegate. The `shuttingDown` guard in
+  // `shutdown` means a crash that fires while a signal-shutdown is already in
+  // flight is ignored. If a crash handler's own work throws, `handleCrash` is
+  // already past the durable log and `shutdown` swallows body errors, so it
+  // cannot recursively re-trigger itself.
+  let crashHandled = false;
+  const handleCrash = (scope: string, err: unknown): void => {
+    if (crashHandled) return;
+    crashHandled = true;
+    logFatal(scope, err);
+    shutdown({ type: "crash", signal: "SIGTERM" });
+  };
+
+  process.on("uncaughtException", (err) => {
+    handleCrash("uncaughtException", err);
+  });
+  process.on("unhandledRejection", (reason) => {
+    handleCrash("unhandledRejection", reason);
   });
 }

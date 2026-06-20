@@ -34,6 +34,60 @@ import {
 import { loadEffectiveProjectConfig } from "./project-resolver.js";
 import { recordActivityEvent } from "./activity-events.js";
 
+/** Thrown when the config file cannot be read or parsed as YAML. */
+export class ConfigReadError extends Error {
+  constructor(
+    public readonly configPath: string,
+    message: string,
+    options?: { cause?: unknown },
+  ) {
+    super(message, options);
+    this.name = "ConfigReadError";
+  }
+}
+
+/**
+ * Read + YAML-parse a config file, wrapping low-level failures (missing
+ * permissions, truncated/corrupt YAML) in a typed, friendly error so the
+ * daemon and its shutdown path don't crash on a raw fs/YAML stack.
+ */
+function readAndParseConfig(configPath: string): unknown {
+  let raw: string;
+  try {
+    raw = readFileSync(configPath, "utf-8");
+  } catch (err) {
+    throw new ConfigReadError(
+      configPath,
+      `Failed to read config file at ${configPath}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+      { cause: err },
+    );
+  }
+
+  try {
+    return parseYaml(raw);
+  } catch (err) {
+    throw new ConfigReadError(
+      configPath,
+      `Failed to parse YAML in config file at ${configPath}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+      { cause: err },
+    );
+  }
+}
+
+/** Format Zod issues into readable, field-pathed lines (no raw ZodError stack). */
+function formatZodIssues(issues: z.ZodIssue[]): string {
+  return issues
+    .map((issue) => {
+      const path = issue.path.length > 0 ? issue.path.join(".") : "(root)";
+      return `  - ${path}: ${issue.message}`;
+    })
+    .join("\n");
+}
+
 function inferScmPlugin(project: {
   repo?: string;
   scm?: Record<string, unknown>;
@@ -67,8 +121,7 @@ function classifyConfigShape(configPath: string): "wrapped" | "flat-or-nonobject
     return "missing";
   }
 
-  const raw = readFileSync(configPath, "utf-8");
-  const parsed = parseYaml(raw);
+  const parsed = readAndParseConfig(configPath);
   return parsed && typeof parsed === "object" && "projects" in (parsed as Record<string, unknown>)
     ? "wrapped"
     : "flat-or-nonobject";
@@ -933,8 +986,7 @@ export function loadConfig(configPath?: string): LoadedConfig {
     throw new ConfigNotFoundError();
   }
 
-  const raw = readFileSync(path, "utf-8");
-  const parsed = parseYaml(raw);
+  const parsed = readAndParseConfig(path);
   const shape = classifyConfigShape(path);
   const isCanonicalGlobalConfig = isCanonicalGlobalConfigPath(path);
   const normalizedParsed =
@@ -968,8 +1020,7 @@ export function loadConfigWithPath(configPath?: string): {
     throw new ConfigNotFoundError();
   }
 
-  const raw = readFileSync(path, "utf-8");
-  const parsed = parseYaml(raw);
+  const parsed = readAndParseConfig(path);
   const shape = classifyConfigShape(path);
   const isCanonicalGlobalConfig = isCanonicalGlobalConfigPath(path);
   const normalizedParsed =
@@ -994,9 +1045,14 @@ export function loadConfigWithPath(configPath?: string): {
 
 /** Validate a raw config object */
 export function validateConfig(raw: unknown): OrchestratorConfig {
-  const validated = OrchestratorConfigSchema.parse(raw);
+  const result = OrchestratorConfigSchema.safeParse(raw);
+  if (!result.success) {
+    throw new Error(
+      `Invalid agent-orchestrator config:\n${formatZodIssues(result.error.issues)}`,
+    );
+  }
 
-  let config = validated as OrchestratorConfig;
+  let config = result.data as OrchestratorConfig;
   config = expandPaths(config);
   config = applyProjectDefaults(config);
   config = applyDefaultReactions(config);

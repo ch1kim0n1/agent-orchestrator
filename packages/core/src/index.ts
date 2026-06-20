@@ -16,8 +16,12 @@ export {
   getDefaultConfig,
   findConfig,
   findConfigFile,
+  ConfigReadError,
 } from "./config.js";
 export { isPortfolioEnabled } from "./feature-flags.js";
+
+// Crash/error logging
+export { logFatal } from "./error-log.js";
 
 // Plugin registry
 export {
