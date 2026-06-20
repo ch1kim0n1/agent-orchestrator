@@ -108,6 +108,63 @@
   color: var(--t3);
 }
 
+/* ── Board flow line (the core metaphor, in motion) ──────────────────
+   The subtitle promises "sessions flowing from work → review → merge".
+   This makes that flow literal: a faint orchestrator-accent pulse travels
+   left→right along a hairline under the header, in the same direction the
+   board reads. One element, theme-safe tokens, no layout cost. Motion is
+   meaning here — it names the pipeline's direction — but it is non-essential,
+   so prefers-reduced-motion drops it to a static hairline. */
+.dashboard-main__subhead {
+  position: relative;
+}
+
+.dashboard-main__subhead::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: -7px;
+  height: 1px;
+  background:
+    linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in srgb, var(--color-accent) 85%, transparent),
+        transparent
+      )
+      0 0 / 20% 100% no-repeat,
+    linear-gradient(90deg, transparent, var(--color-border-subtle) 25%, var(--color-border-subtle) 75%, transparent);
+  animation: board-flow 6s linear infinite;
+}
+
+@keyframes board-flow {
+  from {
+    background-position:
+      -25% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      125% 0,
+      0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-main__subhead::after {
+    animation: none;
+    /* keep only the static hairline so the header still has a base rule */
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-border-subtle) 25%,
+      var(--color-border-subtle) 75%,
+      transparent
+    );
+  }
+}
+
 /* ── Column heads (mockup .col-head) ─────────────────────────────────
    Small dot with a semantic glow + uppercase tinted title (.08em) +
    mono count pushed right. The trough/glow already live in globals. */
@@ -141,6 +198,12 @@
   font-size: 11px;
   line-height: 1;
   color: var(--t3);
+  transition: opacity 0.12s ease;
+}
+
+/* Empty columns are noise, not signal — dim them so populated columns read first. */
+.kanban-column__count[data-count="0"] {
+  opacity: 0.3;
 }
 
 /* Per-column dot glow + tinted title, mirroring kanban.html .c-work/.c-attn/.c-rev/.c-ready */
@@ -250,7 +313,7 @@
 .done-bar__toggle {
   padding: 11px 4px 16px;
   color: var(--t3);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .done-bar__count {

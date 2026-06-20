@@ -340,22 +340,22 @@ export function PullRequestsPage({
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)]">
-                    <th className="px-3 py-2 text-left text-[10.5px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
+                    <th className="px-3 py-2 text-left text-[11px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
                       PR
                     </th>
-                    <th className="px-3 py-2 text-left text-[10.5px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
+                    <th className="px-3 py-2 text-left text-[11px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
                       Title
                     </th>
-                    <th className="px-3 py-2 text-left text-[10.5px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
+                    <th className="px-3 py-2 text-left text-[11px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
                       Size
                     </th>
-                    <th className="px-3 py-2 text-left text-[10.5px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
+                    <th className="px-3 py-2 text-left text-[11px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
                       CI
                     </th>
-                    <th className="px-3 py-2 text-left text-[10.5px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
+                    <th className="px-3 py-2 text-left text-[11px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
                       Review
                     </th>
-                    <th className="px-3 py-2 text-left text-[10.5px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
+                    <th className="px-3 py-2 text-left text-[11px] font-mono font-500 uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
                       Threads
                     </th>
                   </tr>
@@ -416,7 +416,7 @@ export function PullRequestsPage({
                     <tr>
                       <td
                         colSpan={6}
-                        className="px-4 py-6 text-[12px] text-[var(--color-text-secondary)]"
+                        className="px-4 py-6 text-[13px] text-[var(--color-text-secondary)]"
                       >
                         No pull requests yet.
                       </td>

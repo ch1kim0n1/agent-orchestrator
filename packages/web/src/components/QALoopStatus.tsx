@@ -8,6 +8,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
+
+/**
+ * State icons are monochrome inline SVG (lucide-derived paths) that inherit the
+ * surrounding token color via `currentColor` — they theme with light/dark and
+ * sit inside the mission-control palette. Do not use emoji here: full-color
+ * emoji ignore the palette and read as unfinished against the control-room UI.
+ */
+function StateGlyph({ children }: { children: ReactNode }) {
+  return <span className="inline-flex text-2xl leading-none">{children}</span>;
+}
+
+function StateIcon({ children }: { children: ReactNode }) {
+  return (
+    <svg
+      className="h-[22px] w-[22px]"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
 
 interface QALoopState {
   taskId: string;
@@ -43,46 +71,76 @@ interface QAFinding {
   code?: string;
 }
 
-const STATE_CONFIG = {
+const STATE_CONFIG: Record<
+  QALoopState["state"],
+  { label: string; className: string; icon: ReactNode }
+> = {
   idle: {
     label: "Idle",
     className: "bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)]",
-    icon: "○",
+    icon: <StateGlyph>○</StateGlyph>,
   },
   building: {
     label: "Building",
     className: "bg-[var(--color-tint-blue)] text-[var(--color-accent-blue)]",
-    icon: "🔨",
+    // hammer
+    icon: (
+      <StateIcon>
+        <path d="m15 12-8.5 8.5a2.12 2.12 0 1 1-3-3L12 9" />
+        <path d="M17.64 15 22 10.64" />
+        <path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h.86c.85 0 1.65.34 2.25.93l1.25 1.25" />
+      </StateIcon>
+    ),
   },
   qa_running: {
     label: "QA Running",
     className: "bg-[var(--color-tint-yellow)] text-[var(--color-accent-yellow)]",
-    icon: "🔍",
+    // magnifier
+    icon: (
+      <StateIcon>
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </StateIcon>
+    ),
   },
   qa_passed: {
     label: "QA Passed",
     className: "bg-[var(--color-tint-green)] text-[var(--color-status-merge)]",
-    icon: "✓",
+    icon: <StateGlyph>✓</StateGlyph>,
   },
   qa_failed: {
     label: "QA Failed",
     className: "bg-[var(--color-tint-red)] text-[var(--color-status-error)]",
-    icon: "✗",
+    icon: <StateGlyph>✗</StateGlyph>,
   },
   rework: {
     label: "Rework",
     className: "bg-[var(--color-tint-orange)] text-[var(--color-accent-orange)]",
-    icon: "🔄",
+    // cycle / refresh
+    icon: (
+      <StateIcon>
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+        <path d="M21 3v5h-5" />
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+        <path d="M8 16H3v5" />
+      </StateIcon>
+    ),
   },
   blocked: {
     label: "Blocked",
     className: "bg-[var(--color-tint-red)] text-[var(--color-status-error)]",
-    icon: "🚫",
+    // ban / no-entry
+    icon: (
+      <StateIcon>
+        <circle cx="12" cy="12" r="10" />
+        <path d="m4.9 4.9 14.2 14.2" />
+      </StateIcon>
+    ),
   },
   done: {
     label: "Done",
     className: "bg-[var(--color-tint-violet)] text-[var(--color-accent-violet)]",
-    icon: "✓",
+    icon: <StateGlyph>✓</StateGlyph>,
   },
 };
 
@@ -170,7 +228,7 @@ export default function QALoopStatus({ taskId }: QALoopStatusProps) {
       <div className={`${config.className} rounded-lg p-4`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">{config.icon}</span>
+            <span className="inline-flex items-center justify-center">{config.icon}</span>
             <div>
               <h3 className="font-semibold">{config.label}</h3>
               <p className="text-xs text-[var(--color-text-secondary)]">Task: {qaState.taskId}</p>

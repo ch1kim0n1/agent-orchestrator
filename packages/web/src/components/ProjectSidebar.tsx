@@ -116,7 +116,7 @@ function SidebarBrand({ onToggleCollapsed }: { onToggleCollapsed?: () => void })
   return (
     <div className="project-sidebar__brand">
       <AppMark />
-      <span className="project-sidebar__brand-name">
+      <span className="project-sidebar__brand-name" title="Agent / Orchestrator">
         Agent<b className="project-sidebar__brand-sep"> / </b>Orchestrator
       </span>
       {onToggleCollapsed ? (
@@ -849,7 +849,7 @@ function ProjectSidebarInner({
                       <path d="M12 17h.01" />
                       <path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.72 3h16.92a2 2 0 0 0 1.72-3L13.7 3.86a2 2 0 0 0-3.4 0Z" />
                     </svg>
-                    <span className="project-sidebar__proj-name">{project.name}</span>
+                    <span className="project-sidebar__proj-name" title={project.name}>{project.name}</span>
                     <span className="project-sidebar__proj-badge project-sidebar__proj-badge--degraded">
                       degraded
                     </span>
@@ -879,7 +879,7 @@ function ProjectSidebarInner({
                     >
                       <path d="m9 18 6-6-6-6" />
                     </svg>
-                    <span className="project-sidebar__proj-name">{project.name}</span>
+                    <span className="project-sidebar__proj-name" title={project.name}>{project.name}</span>
                     <span className="project-sidebar__proj-count">
                       {sessionsByProject.get(project.id)?.length ?? 0}
                     </span>

@@ -72,7 +72,7 @@
   flex-shrink: 0;
   max-width: 240px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--t3);
   text-decoration: none;
   white-space: nowrap;
@@ -144,7 +144,7 @@
   border-bottom: 1px solid var(--line);
 }
 .terminal-chrome-pane-label {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -279,7 +279,7 @@
   background: var(--amber);
 }
 .inspector-timeline__et {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--t1);
   line-height: 1.45;
 }
@@ -294,7 +294,7 @@
   color: var(--t2);
 }
 .inspector-timeline__ets {
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--t4);
   font-family: var(--font-mono);
   margin-top: 2px;

@@ -255,7 +255,7 @@ function SessionCardView({ session, onKill, onMerge, onRestore }: SessionCardPro
                   }}
                 >
                   {isMultiRepo && (
-                    <span className="shrink-0 font-[var(--font-mono)] text-[9px] text-[var(--color-text-tertiary)] bg-[var(--color-bg-subtle)] px-1 py-0.5 rounded leading-none">
+                    <span className="shrink-0 font-[var(--font-mono)] text-[10px] text-[var(--color-text-tertiary)] bg-[var(--color-bg-subtle)] px-1 py-0.5 rounded leading-none">
                       {getRepoInitials(p.repo)}
                     </span>
                   )}

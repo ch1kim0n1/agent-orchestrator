@@ -181,7 +181,7 @@ function SidebarPlaceholder({ message }: { message: string }) {
             />
           ))}
         </div>
-        <div className="pt-2 text-[12px] text-[var(--color-text-tertiary)]">{message}</div>
+        <div className="pt-2 text-[13px] text-[var(--color-text-tertiary)]">{message}</div>
       </div>
     </div>
   );

@@ -85,7 +85,10 @@ export default function TaskBoard() {
   const getTasksByStatus = (status: string) => tasks.filter((task) => task.status === status);
 
   const getPriorityIcon = (priority: string) => {
-    const icons = { low: "↓", medium: "→", high: "↑", critical: "⚡" };
+    // Monochrome arrow glyphs only — `critical` uses a double-headed up arrow
+    // (↟) so the whole set is one typographic family. No emoji: a color emoji
+    // breaks the mission-control palette and ignores the active theme.
+    const icons = { low: "↓", medium: "→", high: "↑", critical: "↟" };
     return icons[priority as keyof typeof icons] || "→";
   };
 

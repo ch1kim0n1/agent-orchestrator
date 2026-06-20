@@ -233,7 +233,7 @@ export function DoneSessionCard({ session, onRestore }: DoneSessionCardProps) {
                 </svg>
                 Summary
               </div>
-              <p className="text-[12px] leading-relaxed text-[var(--color-text-secondary)]">
+              <p className="text-[13px] leading-relaxed text-[var(--color-text-secondary)]">
                 {session.summary}
               </p>
             </div>
@@ -253,7 +253,7 @@ export function DoneSessionCard({ session, onRestore }: DoneSessionCardProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="text-[12px] text-[var(--color-accent)] hover:underline"
+                className="text-[13px] text-[var(--color-accent)] hover:underline"
               >
                 {session.issueLabel || session.issueUrl}
                 {session.issueTitle && `: ${session.issueTitle}`}
@@ -283,7 +283,7 @@ export function DoneSessionCard({ session, onRestore }: DoneSessionCardProps) {
                 </svg>
                 PR
               </div>
-              <p className="text-[12px] text-[var(--color-text-secondary)]">
+              <p className="text-[13px] text-[var(--color-text-secondary)]">
                 <a
                   href={pr.url}
                   target="_blank"
@@ -325,7 +325,7 @@ export function DoneSessionCard({ session, onRestore }: DoneSessionCardProps) {
           )}
 
           {!pr && (
-            <p className="text-[12px] text-[var(--color-text-tertiary)]">
+            <p className="text-[13px] text-[var(--color-text-tertiary)]">
               No PR associated with this session.
             </p>
           )}

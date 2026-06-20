@@ -175,6 +175,40 @@
   --color-alert-conflict-bg: rgba(202, 138, 4, 0.06);
   --color-alert-comment: #7c3aed;
   --color-alert-comment-bg: rgba(124, 58, 237, 0.06);
+
+  /* ════════════════════════════════════════════════════════════════════
+     MISSION-CONTROL RAW TOKENS — LIGHT (warm-hero)
+     The mc-sidebar/mc-board/mc-session stylesheets consume the raw control-
+     room literals (--bg, --t1..t4, --blue, etc.) directly. Those were only
+     defined under .dark, so in light mode the chrome lost its values and the
+     sidebar rendered dark. Map them here onto the warm light palette so the
+     mission-control screens are fully themed in light too. Semantic accents
+     follow the dark contract: blue = orchestrator/you, orange = working
+     agent, amber = needs-input, red = failing, green = mergeable. */
+  --bg: var(--color-bg-base); /* #f5f3f0 warm parchment */
+  --bg-side: var(--color-bg-sidebar); /* #f0ede9 */
+  --bg-top: var(--color-bg-surface); /* #ffffff */
+  --col: var(--color-column-bg); /* #ece9e4 kanban trough */
+  --card: var(--color-bg-card); /* #ffffff */
+  --card-hover: var(--color-bg-hover); /* #f7f5f2 */
+  --term: #1c1917; /* terminal stays dark even in light mode (legibility of code) */
+
+  --t1: var(--color-text-primary); /* #1c1917 */
+  --t2: var(--color-text-secondary); /* #57534e */
+  --t3: var(--color-text-tertiary); /* #78716c */
+  --t4: var(--color-text-muted); /* #a8a29e */
+
+  --line: var(--color-border-subtle);
+  --line-2: var(--color-border-strong);
+  --hover: var(--color-bg-subtle);
+  --hover-2: var(--color-hover-overlay);
+
+  --blue: var(--color-accent); /* #5c64b5 orchestrator / you */
+  --blue-soft: #4a52a0;
+  --orange: var(--color-accent-orange); /* #bc4c00 working agent */
+  --amber: var(--color-accent-amber); /* #d97706 needs your input */
+  --red: var(--color-accent-red); /* #dc2626 failing / stuck */
+  --green: var(--color-status-merge); /* #16a34a mergeable / passed */
 }
 
 /* ── Dark mode ────────────────────────────────────────────────────── */

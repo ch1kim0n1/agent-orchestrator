@@ -72,8 +72,8 @@ function TerminalIcon({ accent }: { accent: string }) {
 
 function ActionButton({ action, primary = false }: { action: ErrorAction; primary?: boolean }) {
   const className = primary
-    ? "inline-flex items-center justify-center rounded-full border px-4 py-2 text-[12px] font-semibold transition-colors hover:no-underline"
-    : "inline-flex items-center justify-center rounded-full border px-4 py-2 text-[12px] font-medium transition-colors hover:no-underline";
+    ? "inline-flex items-center justify-center rounded-full border px-4 py-2 text-[13px] font-semibold transition-colors hover:no-underline"
+    : "inline-flex items-center justify-center rounded-full border px-4 py-2 text-[13px] font-medium transition-colors hover:no-underline";
   const style = primary
     ? {
         background: "var(--color-accent)",
@@ -175,7 +175,7 @@ export function ErrorDisplay({
                 borderColor: "var(--color-border-subtle)",
               }}
             >
-              <summary className="cursor-pointer list-none px-4 py-3 text-[12px] font-medium text-[var(--color-text-secondary)]">
+              <summary className="cursor-pointer list-none px-4 py-3 text-[13px] font-medium text-[var(--color-text-secondary)]">
                 {detailsTitle}
               </summary>
               <div
@@ -188,7 +188,7 @@ export function ErrorDisplay({
                   </p>
                 ) : null}
                 {error?.message ? (
-                  <p className="mb-3 text-[12px] leading-5 text-[var(--color-text-secondary)]">
+                  <p className="mb-3 text-[13px] leading-5 text-[var(--color-text-secondary)]">
                     {error.message}
                   </p>
                 ) : null}
