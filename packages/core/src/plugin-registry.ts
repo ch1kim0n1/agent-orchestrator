@@ -178,7 +178,7 @@ function prepareConfig(
   // may legitimately collide with a built-in (e.g. a forked "slack"), and the path field
   // here IS the loading path, not a stray user config value.
   const isBuiltin =
-    !isExternalLoad && BUILTIN_PLUGIN_KEYS.has(makeKey(slot as import("./types.js").PluginSlot, name));
+    !isExternalLoad && BUILTIN_PLUGIN_KEYS.has(makeKey(slot as PluginSlot, name));
   if ((rawConfig.package || isBuiltin) && "path" in rawConfig) {
     const loadingMethod = rawConfig.package
       ? `npm package "${rawConfig.package}"`

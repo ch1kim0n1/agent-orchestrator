@@ -14,7 +14,11 @@ foreach ($a in $args) {
         '-h'      { $Help = $true }
         '--help'  { $Help = $true }
         default {
-            Write-Error "Unknown option: $a"
+            # Write straight to stderr instead of Write-Error: Windows PowerShell 5.1
+            # decorates and console-width-wraps Write-Error output (splitting
+            # "Unknown option" across lines), which mangles the message users and
+            # callers parse. This matches ao-doctor.sh's plain `echo >&2`.
+            [Console]::Error.WriteLine("Unknown option: $a")
             exit 1
         }
     }

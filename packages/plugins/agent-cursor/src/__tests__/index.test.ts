@@ -49,8 +49,10 @@ vi.mock("node:child_process", () => ({
     const result = mockExecFileAsync(...args.slice(0, -1));
     if (typeof callback === "function" && result && typeof result.then === "function") {
       result.then(
-        (value: { stdout: string; stderr: string }) => (callback as Function)(null, value),
-        (err: Error) => (callback as Function)(err),
+        (value: { stdout: string; stderr: string }) =>
+          (callback as (err: Error | null, result?: { stdout: string; stderr: string }) => void)(null, value),
+        (err: Error) =>
+          (callback as (err: Error | null) => void)(err),
       );
     }
   },

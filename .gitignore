@@ -10,6 +10,7 @@ coverage/
 packages/web/screenshots/
 .playwright-cli/
 .ao-live-run/
+.ux-test/
 user-run-report.md
 
 # Environment files (secrets)

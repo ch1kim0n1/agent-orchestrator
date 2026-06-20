@@ -51,6 +51,8 @@
     "screenshot:install": "npx playwright install chromium"
   },
   "dependencies": {
+    "@aoagents/agentmesh-adapters": "workspace:*",
+    "@aoagents/agentmesh-core": "workspace:*",
     "@aoagents/ao-core": "workspace:*",
     "@aoagents/ao-plugin-agent-aider": "workspace:*",
     "@aoagents/ao-plugin-agent-claude-code": "workspace:*",
@@ -65,8 +67,7 @@
     "@aoagents/ao-plugin-tracker-github": "workspace:*",
     "@aoagents/ao-plugin-tracker-linear": "workspace:*",
     "@aoagents/ao-plugin-workspace-worktree": "workspace:*",
-    "@aoagents/agentmesh-core": "workspace:*",
-    "@aoagents/agentmesh-adapters": "workspace:*",
+    "@sentry/nextjs": "^10.58.0",
     "@xterm/addon-fit": "0.12.0-beta.256",
     "@xterm/addon-unicode11": "0.10.0-beta.256",
     "@xterm/addon-web-links": "0.13.0-beta.256",

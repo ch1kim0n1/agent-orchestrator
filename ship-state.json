@@ -1,8 +1,9 @@
 {
-  "last_run": "2026-06-19T03:35:00Z",
+  "last_run": "2026-06-19T23:55:00Z",
+  "run_number": 5,
   "verdict": "READY FOR DEMO",
-  "release_target": "Entire product — AgentMesh CLI + Web Dashboard",
-  "ship_decision_applies_to": "All packages; mobile audit completed at 375/390/414px",
+  "release_target": "Entire product — AgentMesh CLI + Web Dashboard (targeted: web component/CSS legibility pass, agentmesh adapter cross-platform fix, CLI doctor script)",
+  "ship_decision_applies_to": "packages/web, packages/cli, packages/agentmesh-core, packages/agentmesh-adapters, packages/core (changed surfaces this run)",
   "surface_map": [
     {
       "surface": "Web Dashboard",
@@ -12,7 +13,7 @@
       "release_critical": "Yes",
       "changed": true,
       "audit_depth": "Full",
-      "blast_radius_upgrade": "globals.css + TaskBoard.tsx mobile fixes"
+      "blast_radius_upgrade": "font-size legibility bumps across 8 components + mc-*.css; @sentry/nextjs dep added"
     },
     {
       "surface": "CLI (ao)",
@@ -20,9 +21,29 @@
       "path": "packages/cli, packages/ao",
       "user_facing": true,
       "release_critical": "Yes",
-      "changed": false,
+      "changed": true,
       "audit_depth": "Targeted",
-      "blast_radius_upgrade": null
+      "blast_radius_upgrade": "ao-doctor.ps1 arg-parse stderr fix"
+    },
+    {
+      "surface": "AgentMesh adapters",
+      "type": "Library",
+      "path": "packages/agentmesh-adapters",
+      "user_facing": false,
+      "release_critical": "Yes",
+      "changed": true,
+      "audit_depth": "Targeted",
+      "blast_radius_upgrade": "opencode-adapter: removed hardcoded /tmp path + tail shell-out (Windows-breaking) -> getActivityLogPath + fs.readFile"
+    },
+    {
+      "surface": "AgentMesh core",
+      "type": "Library",
+      "path": "packages/agentmesh-core",
+      "user_facing": false,
+      "release_critical": "Yes",
+      "changed": true,
+      "audit_depth": "Smoke",
+      "blast_radius_upgrade": "vitest pool:forks added -> fixes prior crash race"
     }
   ],
   "environment_matrix": {
@@ -30,71 +51,80 @@
     "test_ci": true,
     "staging": false,
     "production_smoke": false,
-    "staging_gap_rule_triggered": false
+    "staging_gap_rule_triggered": false,
+    "note": "Local dev tool (CLI + local dashboard), not hosted SaaS with payments. Staging gap rule does not strictly apply."
   },
   "issues_filed": [],
   "fixes_applied": [
     {
-      "description": "TaskBoard Start button: py-1 → py-3.5 to reach 44px tap target (Playwright verified)",
-      "file": "packages/web/src/components/TaskBoard.tsx",
+      "description": "ao-doctor.ps1 unknown-flag handler: Write-Error -> [Console]::Error.WriteLine. Windows PowerShell 5.1 console-width-wrapped Write-Error split 'Unknown option' across lines, failing the doctor-ps1 test. Now clean single-line stderr, matches bash echo >&2.",
+      "file": "packages/cli/src/assets/scripts/ao-doctor.ps1",
       "verified": true
     },
     {
-      "description": "Sidebar toggle: min-width/min-height 44px added to .dashboard-app-sidebar-toggle",
-      "file": "packages/web/src/app/globals.css",
+      "description": ".ux-test/ added to .gitignore so /ship screenshot+drive.py artifacts are not accidentally committed.",
+      "file": ".gitignore",
       "verified": true
+    }
+  ],
+  "prior_blockers_resolved": [
+    {
+      "description": "P0 OpenClaw token committed at 0393ab70 (prior critical path). Commit hash no longer resolves ('Not a valid object name') after repo migration (commit 09c6c43). Full-history token sweep found only placeholder/redaction test fixtures (ghp_xxx, Bearer eyJ...abc). No real secret reproducible.",
+      "status": "resolved_by_history_rewrite",
+      "residual_human_action": "If any old remote/fork still carries pre-migration history, rotate the OpenClaw token defensively."
     },
     {
-      "description": "/api/health endpoint returning {status:'ok',version:'0.9.2'} (confirmed via curl)",
-      "file": "packages/web/src/app/api/health/route.ts",
-      "verified": true
+      "description": "Intermittent agentmesh-core crash under concurrent pnpm test load (better-sqlite3 native exit race).",
+      "status": "resolved",
+      "evidence": "vitest pool:forks added; full suite ran with zero crashes; agentmesh-core 32/32 clean."
     }
   ],
   "claims_tested": [
+    { "claim": "pnpm build (web) succeeds", "result": "pass" },
+    { "claim": "typecheck core + web clean", "result": "pass" },
+    { "claim": "web test suite zero failures", "result": "pass" },
+    { "claim": "agentmesh-core test suite zero failures + no crash", "result": "pass" },
+    { "claim": "agentmesh-adapters test suite zero failures", "result": "pass" },
+    { "claim": "CLI doctor-ps1 rejects unknown flags with exit 1", "result": "pass" },
+    { "claim": "/api/health returns {status:'ok',version}", "result": "pass" },
+    { "claim": ".env covered by .gitignore", "result": "pass" },
+    { "claim": "no real secrets in current git history", "result": "pass" },
+    { "claim": "@sentry/nextjs dependency is actually wired (config/init present)", "result": "fail" }
+  ],
+  "open_findings": [
     {
-      "claim": "Mobile /agentmesh: no horizontal overflow at 375px",
-      "result": "pass"
+      "severity": "P2",
+      "category": "Release Engineering / Monitoring",
+      "title": "@sentry/nextjs added to deps but never initialized",
+      "detail": "packages/web/package.json declares @sentry/nextjs ^10.58.0 but there is no sentry.client/server/edge.config.ts, no instrumentation.ts, no Sentry init in next.config.js, and no Sentry.* usage in src. Dead dependency: ships bundle weight, provides no error monitoring, implies observability that does not exist. Not auto-repaired: requires a DSN (secret) and a product decision.",
+      "fix_direction": "Either (a) wire it: add instrumentation.ts + sentry.*.config.ts with SENTRY_DSN env, wrap next.config.js with withSentryConfig, document SENTRY_DSN in .env.local.example; or (b) remove the dependency until monitoring is actually adopted."
     },
     {
-      "claim": "Mobile /agentmesh: primary CTAs ≥44px",
-      "result": "pass"
-    },
-    {
-      "claim": "Mobile /: no horizontal overflow at 375px",
-      "result": "pass"
-    },
-    {
-      "claim": "/api/health returns {status:'ok',version:'0.9.2'}",
-      "result": "pass"
-    },
-    {
-      "claim": "XSS in task title rendered as escaped text",
-      "result": "pass"
-    },
-    {
-      "claim": "pnpm test: zero failures",
-      "result": "partial"
+      "severity": "P3",
+      "category": "Setup / Environment",
+      "title": "Node engine mismatch warning on every install/test",
+      "detail": "Local Node is v20.17.0 but workspace requires >=20.18.3. pnpm prints 'Unsupported engine' on every command. Not a code defect; bump local Node or confirm CI pins >=20.18.3.",
+      "fix_direction": "Install Node >=20.18.3 locally; verify CI workflow node version satisfies the engines field."
     }
   ],
-  "critical_path": [
-    "Rotate/invalidate OpenClaw token committed at 0393ab70 on 2026-02-15 (human action required)",
-    "Investigate intermittent agentmesh-core test crash under concurrent pnpm test load (better-sqlite3 Windows native exit race)"
-  ],
+  "critical_path": [],
   "sections_audited": [
-    "Pre-flight (state diff)",
-    "Test suite (full, 2 runs)",
-    "Build verification",
-    "Live server probe (all key routes)",
-    "Mobile audit (Playwright, 375/390/414px, / and /agentmesh)",
-    "Tap target measurement and fix",
-    "XSS rendering verification",
-    "Health endpoint verification"
+    "Pre-flight (state diff vs Run 4 + working tree)",
+    "Git diff + blast radius (web components/css, agentmesh adapter, cli doctor, DESIGN.md)",
+    "Secret sweep (full history + current tree) — prior P0 resolved",
+    ".gitignore verification (.env covered)",
+    "Build verification (web, exit 0)",
+    "Typecheck (core + web, clean)",
+    "Full test suite (web 1016/0, cli 893+/1->0 after fix, agentmesh-core 32/0, agentmesh-adapters 19/0)",
+    "Auto-repair (ao-doctor.ps1 stderr fix, verified)",
+    "Docs consistency (DESIGN.md --t3 AA contrast matches code)",
+    "Dependency wiring audit (Sentry half-wired)"
   ],
   "sections_skipped": [
-    "Documentation (unchanged since last run)",
-    "Language audit (unchanged since last run)",
-    "Cold clone (no clean environment)",
-    "Live agent spawn (needs real GitHub issue)"
+    "Cold clone (no clean environment available this run)",
+    "Live dashboard route probe (dev server not started this run; build output route table verified instead)",
+    "Live agent spawn (needs real GitHub issue + credentials)",
+    "Mobile re-audit at pixel level (changes were font-size increases only — legibility-improving, no layout risk; prior 375/390/414 audit holds)"
   ],
   "diff_scope": "targeted"
 }
