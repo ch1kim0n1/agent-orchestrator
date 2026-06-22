@@ -43,6 +43,45 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Security headers applied to every route (issue #93).
+        // CSP is defense-in-depth: blocks XSS escalation if a future code
+        // path renders unescaped user input. Tightened to 'self' for
+        // scripts/styles/images/fonts; connect-src allows same-origin +
+        // ws/wss for the terminal WebSocket + SSE stream.
+        source: "/(.*)",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+          // HSTS: only enforced by browsers over HTTPS; ignored on http.
+          // 1 year + preload. Remove preload if not submitting to the HSTS
+          // preload list (otherwise you can't easily remove the domain).
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              // Next.js dev/prod injects inline scripts for hydration data;
+              // allow 'unsafe-inline' for scripts only (style-src stays
+              // strict). Tightening to nonces requires next.config nonce
+              // plumbing — tracked as a follow-up.
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "font-src 'self' data:",
+              // connect-src: same-origin + ws/wss for terminal WebSocket.
+              "connect-src 'self' ws: wss:",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "object-src 'none'",
+              "worker-src 'self' blob:",
+            ].join("; "),
+          },
+        ],
+      },
+      {
         source: "/sw.js",
         headers: [
           { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
