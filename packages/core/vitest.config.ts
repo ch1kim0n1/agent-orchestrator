@@ -43,9 +43,17 @@ export default defineConfig({
     },
     coverage: {
       provider: "v8",
-      reporter: ["lcov"],
+      reporter: ["lcov", "text-summary"],
       include: ["src/**/*.ts"],
       exclude: ["src/__tests__/**", "src/index.ts", "src/recovery/index.ts"],
+      thresholds: {
+        // Issue #78: floor to prevent gross coverage regression. Ratchet
+        // up as coverage improves — do NOT lower these without team review.
+        statements: 50,
+        branches: 50,
+        functions: 50,
+        lines: 50,
+      },
     },
   },
 });

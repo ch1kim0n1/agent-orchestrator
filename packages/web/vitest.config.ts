@@ -25,8 +25,18 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}", "server/**/*.test.ts"],
     coverage: {
       provider: "v8",
-      reporter: ["lcov"],
+      reporter: ["lcov", "text-summary"],
       include: ["src/**/*.{ts,tsx}", "server/**/*.ts"],
+      exclude: ["src/__tests__/**", "src/vitest.d.ts", "src/fonts/**"],
+      thresholds: {
+        // Issue #78: floor to prevent gross coverage regression. Web
+        // coverage is currently low (many components untested — see #7).
+        // 10% is a conservative floor; ratchet up as coverage improves.
+        statements: 10,
+        branches: 10,
+        functions: 10,
+        lines: 10,
+      },
     },
   },
   resolve: {
