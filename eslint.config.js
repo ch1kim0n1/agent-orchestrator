@@ -61,6 +61,10 @@ export default tseslint.config(
       // comment explaining why the error is intentionally swallowed (issue #68).
       // This prevents future bare `} catch {}` from silently discarding errors.
       "no-empty": ["error", { allowEmptyCatch: false }],
+      // Complexity gate (issue #86): warn on functions with >5 params.
+      // max-lines, max-depth, max-complexity were removed from ESLint 10
+      // core rules — use @typescript-eslint or sonarjs plugins if needed.
+      "max-params": ["warn", 5],
       "no-restricted-syntax": [
         "error",
         {
